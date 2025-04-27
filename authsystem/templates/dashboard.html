@@ -1,0 +1,99 @@
+{% comment %} {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to Dashboard</h2>
+
+        <p>Secure Authentication successful ✅</p>
+
+        <a href="{% url 'generate_qr' %}"><button>Setup Authenticator App (QR)</button></a><br><br>
+
+        <a href="{% url 'biometric_login' %}"><button>Login using Biometrics</button></a><br><br>
+
+        <a href="{% url 'logout' %}"><button>Logout</button></a>
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html> {% endcomment %}
+
+{% comment %} {% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to Dashboard</h2>
+
+        <p>Secure Authentication successful ✅</p>
+
+        <!-- Link to Generate the QR Code (for setting up the authenticator app) -->
+        <a href="{% url 'generate_qr' %}"><button>Setup Authenticator App (QR)</button></a><br><br>
+
+        <!-- OTP Form -->
+        <h3>Enter OTP from your Authenticator App:</h3>
+        <form method="POST" action="{% url 'verify_otp' %}">
+            {% csrf_token %}
+            <label for="otp">Enter OTP:</label>
+            <input type="text" id="otp" name="otp" placeholder="Enter OTP" required><br><br>
+            <button type="submit">Verify OTP</button>
+        </form><br><br>
+
+        <!-- Button to Trigger Biometric Login -->
+        <h3>Or, use Biometric Authentication:</h3>
+        <a href="{% url 'biometric_login' %}"><button>Login using Biometrics</button></a><br><br>
+
+        <!-- Logout Button -->
+        <a href="{% url 'logout' %}"><button>Logout</button></a>
+    </div> {% endcomment %}
+
+    {% comment %} <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html> {% endcomment %}
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        
+        <h2>Welcome to Dashboard</h2>
+        {% comment %} <p>Secure Authentication successful ✅</p> {% endcomment %}
+
+        <a href="{% url 'generate_qr' %}"><button>Setup Authenticator App (QR)</button></a><br><br>
+        <a href="{% url 'biometric_login' %}"><button>Login using Biometrics</button></a><br><br>
+        <a href="{% url 'logout' %}"><button>Logout</button></a>
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
+
+
+

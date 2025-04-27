@@ -1,0 +1,241 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code - OTP Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .qr-container {
+            margin-bottom: 20px;
+        }
+
+        .qr-image {
+            width: 200px;
+            height: 200px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 80%;
+            margin: 10px 0;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .message {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .message.success {
+            color: green;
+        }
+
+        .message.error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Scan the QR Code in your Authenticator App</h2>
+        <div class="qr-container">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="qr-image">
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="otp" placeholder="Enter OTP" required>
+            <button type="submit">Verify OTP</button>
+        </form>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- JavaScript to redirect based on OTP verification -->
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    setTimeout(function() {
+                        window.location.href = "{% url 'dashboard' %}";  // Redirect to the dashboard page if OTP is verified successfully
+                    }, 5000);  // Wait for 5 seconds before redirecting
+                {% elif message.tags == 'error' %}
+                    setTimeout(function() {
+                        window.location.href = "{% url 'home' %}";  // Redirect to the home page if OTP is invalid
+                    }, 5000);  // Wait for 5 seconds before redirecting
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </script>
+
+</body>
+</html> {% endcomment %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code - OTP Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .qr-container {
+            margin-bottom: 20px;
+        }
+
+        .qr-image {
+            width: 200px;
+            height: 200px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 80%;
+            margin: 10px 0;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .message {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .message.success {
+            color: green;
+        }
+
+        .message.error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Scan the QR Code in your Authenticator App</h2>
+        <div class="qr-container">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="qr-image">
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="otp" placeholder="Enter OTP" required>
+            <button type="submit">Verify OTP</button>
+        </form>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- JavaScript to handle redirect based on OTP verification -->
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    // Redirect to dashboard if OTP is verified successfully
+                    setTimeout(function() {
+                        window.location.href = "{% url 'dashboard' %}";  // Redirect to the dashboard page
+                    }, 5000);  // Wait for 5 seconds before redirecting
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </script>
+
+</body>
+</html>
