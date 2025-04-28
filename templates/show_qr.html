@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Two-Factor Authentication Setup{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Two-Factor Authentication Setup</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <p>Scan this QR code with your authenticator app (like Google Authenticator, Authy, or Microsoft Authenticator) to enable two-factor authentication.</p>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <div class="qr-code-container p-3 bg-light rounded">
+                            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid">
+                        </div>
+                    </div>
+
+                    <form method="post" action="{% url 'generate_qr' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="otp">Enter the 6-digit code from your authenticator app:</label>
+                            <input type="text" class="form-control" id="otp" name="otp" placeholder="000000" maxlength="6" required>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check"></i> Verify and Enable 2FA
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4">
+                        <h4>Instructions:</h4>
+                        <ol>
+                            <li>Install an authenticator app on your mobile device if you haven't already</li>
+                            <li>Open the app and select "Add Account" or the "+" button</li>
+                            <li>Choose "Scan QR Code" and scan the code above</li>
+                            <li>Enter the 6-digit code that appears in your app</li>
+                            <li>Click "Verify and Enable 2FA" to complete the setup</li>
+                        </ol>
+                    </div>
+
+                    {% if messages %}
+                    <div class="mt-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

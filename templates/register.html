@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Register</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" class="needs-validation" novalidate autocomplete="off">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" value="{{ username|default:'' }}" required autocomplete="off">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" value="{{ email|default:'' }}" required autocomplete="off">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" value="{{ password|default:'' }}" required autocomplete="new-password">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="security_question" class="form-label">Security Question</label>
+                            <select class="form-select" id="security_question" name="security_question" required>
+                                <option value="">Choose a security question...</option>
+                                <option value="What was your first pet's name?">What was your first pet's name?</option>
+                                <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                                <option value="What city were you born in?">What city were you born in?</option>
+                                <option value="What is your favorite book?">What is your favorite book?</option>
+                                <option value="What was your first car?">What was your first car?</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="security_answer" class="form-label">Security Answer</label>
+                            <input type="text" class="form-control" id="security_answer" name="security_answer" placeholder="Enter your answer" value="{{ security_answer|default:'' }}" required>
+                            <div class="form-text">Remember this answer exactly as you'll need it for security verification.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Biometric Authentication</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="biometric_method" id="biometric_fingerprint" value="fingerprint" required>
+                                    <label class="form-check-label" for="biometric_fingerprint">Fingerprint</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="biometric_method" id="biometric_face" value="face" required>
+                                    <label class="form-check-label" for="biometric_face">Face</label>
+                                </div>
+                            </div>
+                            <div class="form-text">Choose one biometric method to enable for your account.</div>
+                        </div>
+                        <div class="mb-3" id="biometric-capture-section" style="display:none;">
+                            <label class="form-label" id="biometric-capture-label"></label>
+                            <div id="face-capture-area" style="display:none;">
+                                <video id="face-video" width="320" height="240" autoplay style="border-radius:8px;"></video>
+                                <canvas id="face-canvas" width="320" height="240" style="display:none;"></canvas>
+                                <br>
+                                <button type="button" class="btn btn-outline-secondary mt-2" id="face-capture-btn">Capture Photo</button>
+                                <button type="button" class="btn btn-outline-secondary mt-2" id="face-retake-btn" style="display:none;">Retake</button>
+                                <div id="face-capture-status" class="ms-2 mt-2"></div>
+                                <input type="hidden" name="face_image" id="face-image-input">
+                            </div>
+                            <div id="fingerprint-capture-area" style="display:none;">
+                                <button type="button" class="btn btn-outline-secondary" id="biometric-capture-btn">Simulate Fingerprint Scan</button>
+                                <span id="biometric-capture-status" class="ms-2"></span>
+                                <div class="form-text mt-2">(Fingerprint capture is simulated. Real fingerprint capture requires special hardware.)</div>
+                            </div>
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const biometricMethods = document.querySelectorAll('input[name="biometric_method"]');
+                                const captureSection = document.getElementById('biometric-capture-section');
+                                const captureLabel = document.getElementById('biometric-capture-label');
+                                const faceCaptureArea = document.getElementById('face-capture-area');
+                                const fingerprintCaptureArea = document.getElementById('fingerprint-capture-area');
+                                const faceVideo = document.getElementById('face-video');
+                                const faceCanvas = document.getElementById('face-canvas');
+                                const faceCaptureBtn = document.getElementById('face-capture-btn');
+                                const faceRetakeBtn = document.getElementById('face-retake-btn');
+                                const faceCaptureStatus = document.getElementById('face-capture-status');
+                                const faceImageInput = document.getElementById('face-image-input');
+                                const fingerprintCaptureBtn = document.getElementById('biometric-capture-btn');
+                                const fingerprintCaptureStatus = document.getElementById('biometric-capture-status');
+                                let faceStream = null;
+
+                                biometricMethods.forEach(method => {
+                                    method.addEventListener('change', function() {
+                                        captureSection.style.display = 'block';
+                                        if (this.value === 'fingerprint') {
+                                            captureLabel.textContent = 'Place your finger on the sensor';
+                                            fingerprintCaptureArea.style.display = 'block';
+                                            faceCaptureArea.style.display = 'none';
+                                            // Stop webcam if running
+                                            if (faceStream) {
+                                                faceStream.getTracks().forEach(track => track.stop());
+                                                faceStream = null;
+                                            }
+                                        } else {
+                                            captureLabel.textContent = 'Position your face in front of the camera';
+                                            fingerprintCaptureArea.style.display = 'none';
+                                            faceCaptureArea.style.display = 'block';
+                                            faceCaptureStatus.textContent = '';
+                                            faceRetakeBtn.style.display = 'none';
+                                            faceCanvas.style.display = 'none';
+                                            faceVideo.style.display = 'block';
+                                            faceImageInput.value = '';
+                                            // Start webcam
+                                            navigator.mediaDevices.getUserMedia({ video: true })
+                                                .then(function(stream) {
+                                                    faceStream = stream;
+                                                    faceVideo.srcObject = stream;
+                                                })
+                                                .catch(function(err) {
+                                                    faceCaptureStatus.textContent = 'Unable to access camera: ' + err;
+                                                    faceCaptureStatus.className = 'ms-2 text-danger';
+                                                });
+                                        }
+                                    });
+                                });
+
+                                if (fingerprintCaptureBtn) {
+                                    fingerprintCaptureBtn.addEventListener('click', function() {
+                                        fingerprintCaptureStatus.textContent = 'Capturing...';
+                                        setTimeout(() => {
+                                            fingerprintCaptureStatus.textContent = 'Capture successful! (Simulated)';
+                                            fingerprintCaptureStatus.className = 'ms-2 text-success';
+                                        }, 1500);
+                                    });
+                                }
+
+                                if (faceCaptureBtn) {
+                                    faceCaptureBtn.addEventListener('click', function() {
+                                        if (faceStream) {
+                                            // Draw video frame to canvas
+                                            faceCanvas.getContext('2d').drawImage(faceVideo, 0, 0, faceCanvas.width, faceCanvas.height);
+                                            // Get image data as base64
+                                            const imageData = faceCanvas.toDataURL('image/png');
+                                            faceImageInput.value = imageData;
+                                            faceVideo.style.display = 'none';
+                                            faceCanvas.style.display = 'block';
+                                            faceCaptureStatus.textContent = 'Face captured!';
+                                            faceCaptureStatus.className = 'ms-2 text-success';
+                                            faceRetakeBtn.style.display = 'inline-block';
+                                            // Stop webcam
+                                            faceStream.getTracks().forEach(track => track.stop());
+                                            faceStream = null;
+                                        }
+                                    });
+                                }
+                                if (faceRetakeBtn) {
+                                    faceRetakeBtn.addEventListener('click', function() {
+                                        faceCanvas.style.display = 'none';
+                                        faceVideo.style.display = 'block';
+                                        faceCaptureStatus.textContent = '';
+                                        faceImageInput.value = '';
+                                        // Restart webcam
+                                        navigator.mediaDevices.getUserMedia({ video: true })
+                                            .then(function(stream) {
+                                                faceStream = stream;
+                                                faceVideo.srcObject = stream;
+                                            })
+                                            .catch(function(err) {
+                                                faceCaptureStatus.textContent = 'Unable to access camera: ' + err;
+                                                faceCaptureStatus.className = 'ms-2 text-danger';
+                                            });
+                                    });
+                                }
+                            });
+                        </script>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                    </form>
+
+                    <div class="mt-3 text-center">
+                        <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

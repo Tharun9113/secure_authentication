@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Capture Face{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Face Capture</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <p>This page will capture your face for biometric authentication. Please position your face in front of the camera and click the "Capture Face" button.</p>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <div id="camera-container" class="mb-3">
+                            <video id="face-video" width="320" height="240" autoplay style="border-radius:8px; display:none;"></video>
+                            <canvas id="face-canvas" width="320" height="240" style="display:none;"></canvas>
+                        </div>
+                        <form method="post" action="{% url 'capture_face' %}" enctype="multipart/form-data" id="face-capture-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="face_image" id="face-image-input">
+                            <button type="button" class="btn btn-primary btn-lg" id="capture-face-btn">
+                                <i class="fas fa-camera"></i> Capture Face
+                            </button>
+                            <button type="submit" class="btn btn-success btn-lg mt-2" id="submit-face-btn" style="display:none;">
+                                <i class="fas fa-check"></i> Submit Photo
+                            </button>
+                            {% if show_retry %}
+                            <button type="button" class="btn btn-warning btn-lg mt-2" id="retry-face-btn">
+                                <i class="fas fa-redo"></i> Retry
+                            </button>
+                            {% endif %}
+                        </form>
+                        <div id="face-capture-status" class="mt-2"></div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4>Instructions:</h4>
+                        <ol>
+                            <li>Make sure you are in a well-lit environment</li>
+                            <li>Position your face in the center of the camera view</li>
+                            <li>Keep a neutral expression and look directly at the camera</li>
+                            <li>Click the "Capture Face" button when ready</li>
+                        </ol>
+                    </div>
+
+                    {% if messages %}
+                    <div class="mt-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if show_retry %}
+<script>var shouldStartCamera = false;</script>
+{% else %}
+<script>var shouldStartCamera = true;</script>
+{% endif %}
+<script>
+let faceStream = null;
+const video = document.getElementById('face-video');
+const canvas = document.getElementById('face-canvas');
+const captureBtn = document.getElementById('capture-face-btn');
+const submitBtn = document.getElementById('submit-face-btn');
+const statusDiv = document.getElementById('face-capture-status');
+const imageInput = document.getElementById('face-image-input');
+const retryBtn = document.getElementById('retry-face-btn');
+
+function startCamera() {
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            faceStream = stream;
+            video.srcObject = stream;
+            video.style.display = 'block';
+            canvas.style.display = 'none';
+            captureBtn.style.display = 'inline-block';
+            submitBtn.style.display = 'none';
+            statusDiv.textContent = '';
+        })
+        .catch(function(err) {
+            statusDiv.textContent = 'Unable to access camera: ' + err;
+            statusDiv.className = 'text-danger';
+        });
+}
+
+if (typeof shouldStartCamera !== 'undefined' && shouldStartCamera) {
+    startCamera();
+}
+
+if (retryBtn) {
+    retryBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        startCamera();
+    });
+}
+
+captureBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    // Draw video frame to canvas
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    // Get image data as base64
+    const imageData = canvas.toDataURL('image/png');
+    imageInput.value = imageData;
+    video.style.display = 'none';
+    canvas.style.display = 'block';
+    statusDiv.textContent = 'Face captured! Please submit the photo.';
+    statusDiv.className = 'text-success';
+    captureBtn.style.display = 'none';
+    submitBtn.style.display = 'inline-block';
+    // Stop webcam
+    if (faceStream) {
+        faceStream.getTracks().forEach(track => track.stop());
+        faceStream = null;
+    }
+});
+</script>
+{% endblock %} 

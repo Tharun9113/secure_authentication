@@ -1,0 +1,39 @@
+Debug mode enabled
+Email settings: HOST=smtp.gmail.com, PORT=587, USER=tharunkumar9113@gmail.com, USE_TLS=True
+Testing SMTP connection...
+send: 'ehlo [192.168.78.203]\r\n'
+reply: b'250-smtp.gmail.com at your service, [2401:4900:902a:1826:d4ac:37a4:ee26:6045]\r\n'
+reply: b'250-SIZE 35882577\r\n'
+reply: b'250-8BITMIME\r\n'
+reply: b'250-STARTTLS\r\n'
+reply: b'250-ENHANCEDSTATUSCODES\r\n'
+reply: b'250-PIPELINING\r\n'
+reply: b'250-CHUNKING\r\n'
+reply: b'250 SMTPUTF8\r\n'
+reply: retcode (250); Msg: b'smtp.gmail.com at your service, [2401:4900:902a:1826:d4ac:37a4:ee26:6045]\nSIZE 35882577\n8BITMIME\nSTARTTLS\nENHANCEDSTATUSCODES\nPIPELINING\nCHUNKING\nSMTPUTF8'
+EHLO successful
+send: 'STARTTLS\r\n'
+reply: b'220 2.0.0 Ready to start TLS\r\n'
+reply: retcode (220); Msg: b'2.0.0 Ready to start TLS'
+STARTTLS successful
+send: 'ehlo [192.168.78.203]\r\n'
+reply: b'250-smtp.gmail.com at your service, [2401:4900:902a:1826:d4ac:37a4:ee26:6045]\r\n'
+reply: b'250-SIZE 35882577\r\n'
+reply: b'250-8BITMIME\r\n'
+reply: b'250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH\r\n'
+reply: b'250-ENHANCEDSTATUSCODES\r\n'
+reply: b'250-PIPELINING\r\n'
+reply: b'250-CHUNKING\r\n'
+reply: b'250 SMTPUTF8\r\n'
+reply: retcode (250); Msg: b'smtp.gmail.com at your service, [2401:4900:902a:1826:d4ac:37a4:ee26:6045]\nSIZE 35882577\n8BITMIME\nAUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH\nENHANCEDSTATUSCODES\nPIPELINING\nCHUNKING\nSMTPUTF8'
+Second EHLO successful
+send: 'AUTH PLAIN AHRoYXJ1bmt1bWFyOTExM0BnbWFpbC5jb20Aa3lmYyB1aXJ0IG9pa2wgZmdjcw==\r\n'
+reply: b'235 2.7.0 Accepted\r\n'
+reply: retcode (235); Msg: b'2.7.0 Accepted'
+SMTP connection successful!
+send: 'QUIT\r\n'
+reply: b'221 2.0.0 closing connection d2e1a72fcca58-73e25912faesm6052755b3a.17 - gsmtp\r\n'
+reply: retcode (221); Msg: b'2.0.0 closing connection d2e1a72fcca58-73e25912faesm6052755b3a.17 - gsmtp'
+Attempting to send email to sandeepchari8151@gmail.com...
+Successfully sent test email to sandeepchari8151@gmail.com
+DEBUG:asyncio:Using proactor: IocpProactor

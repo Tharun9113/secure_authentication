@@ -55,11 +55,11 @@ ROOT_URLCONF = 'secureauth.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],   # empty because we are keeping templates inside app folders
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',  # ← you are missing this
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -74,6 +74,12 @@ AUTH_USER_MODEL = 'authsystem.CustomUser'
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
+# Session serializer settings
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+SERIALIZATION_MODULES = {
+    'json': 'authsystem.utils.MongoJSONEncoder'
+}
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -83,6 +89,20 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# MongoDB configuration (commented out for now)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'djongo',
+#         'NAME': 'secureauth',
+#         'ENFORCE_SCHEMA': False,
+#         'CLIENT': {
+#             'host': 'mongodb://tharunkumar9113:Tharun9535@secureauth.3jv4o7m.mongodb.net/secureauth?retryWrites=true&w=majority',
+#             'username': 'tharunkumar9113',
+#             'password': 'Tharun9535',
+#         }
+#     }
+# }
 
 
 # Password validation
@@ -119,9 +139,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-# STATIC_URL = 'static/'
-
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # Default primary key field type
@@ -129,16 +153,22 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# settings.py
-
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# settings.py (for development only)
-
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'   # Gmail SMTP server
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'tharunkumar9113@gmail.com'     # your Gmail address
 EMAIL_HOST_PASSWORD = 'kyfc uirt oikl fgcs'    # App Password, not normal password
+
+# SendGrid Email Configuration
+# EMAIL_BACKEND = 'authsystem.email_backends.SendGridEmailBackend'
+# SENDGRID_API_KEY = 'YOUR_SENDGRID_API_KEY'  # Replace with your actual SendGrid API key
+# DEFAULT_FROM_EMAIL = 'tharunkumar9113@gmail.com'  # Your verified sender email
+
+# reCAPTCHA settings
+RECAPTCHA_PUBLIC_KEY = '6LcgHCYrAAAAAJMVkSwbkx6xtn4SO37Gnkk_CnZC'
+RECAPTCHA_PRIVATE_KEY = '6LcgHCYrAAAAAMq2uq2AZOab0EFtrulNEyNjl_wS'
+
+LOGIN_URL = '/login/'
 
